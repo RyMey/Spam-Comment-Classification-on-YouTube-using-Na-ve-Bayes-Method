@@ -3,7 +3,7 @@
 ## 245 spam (1)
 ## 204 bukan spam (0)
 
-### 1. Prarposes
+######################## 1. Prarposes
 # baca data
 file <- file.choose()
 data <- read.csv(file,header = TRUE, sep = ",")
@@ -26,3 +26,13 @@ data$COMMENT <- gsub('\t|\\s+', ' ', data$COMMENT)
 koleksi <- data.frame(doc_id=data$COMMENT_ID, text=data$COMMENT)
 korpus <- Corpus(DataframeSource(koleksi))
 
+
+######################## 2. Pengindeksan
+tdm <- TermDocumentMatrix(korpus, control = list(
+  removePunctuation = TRUE,
+  stopwords = FALSE,
+  tolower = TRUE,
+  stemming = FALSE,
+  removeNumbers = TRUE,
+  removePunctuation = TRUE,
+  stripWhitespace = TRUE))
