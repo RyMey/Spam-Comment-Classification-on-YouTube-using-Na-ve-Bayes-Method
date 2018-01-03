@@ -19,20 +19,19 @@ data$COMMENT <- paste(data$AUTHOR,data$CONTENT)
 require(tm)
 library(tm)
 data$COMMENT <- removePunctuation(data$COMMENT)
-# delete bukan alfabet
-data$COMMENT <- gsub('[^a-zA-Z]', ' ', data$COMMENT)
-data$COMMENT <- gsub('\t|\\s+', ' ', data$COMMENT)
+# delete karakter yang tidak diperlukan
+# data$COMMENT <- gsub('[^a-zA-Z]', ' ', data$COMMENT) # delete selain alfabet
+# data$COMMENT <- gsub('^[0-9]+', ' ', data$COMMENT) # delete angka
+data$COMMENT <- gsub('\t|\\s+', ' ', data$COMMENT) # merubah space yg tidak perlu
 # jadikan dalam korpus
 koleksi <- data.frame(doc_id=data$COMMENT_ID, text=data$COMMENT)
 korpus <- Corpus(DataframeSource(koleksi))
 
 
 ######################## 2. Pengindeksan
-tdm <- TermDocumentMatrix(korpus, control = list(
-  removePunctuation = TRUE,
-  stopwords = FALSE,
-  tolower = TRUE,
-  stemming = FALSE,
-  removeNumbers = TRUE,
-  removePunctuation = TRUE,
-  stripWhitespace = TRUE))
+# stemming
+korpus <- tm_map(korpus, stemDocument)
+# remove stopword
+korpus <- tm_map(korpus, removeWords, stopwords("english"))
+# membuat tdm
+tdm <- TermDocumentMatrix(korpus)
