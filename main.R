@@ -21,7 +21,7 @@ library(tm)
 data$COMMENT <- removePunctuation(data$COMMENT)
 # delete karakter yang tidak diperlukan
 # data$COMMENT <- gsub('[^a-zA-Z]', ' ', data$COMMENT) # delete selain alfabet
-# data$COMMENT <- gsub('^[0-9]+', ' ', data$COMMENT) # delete angka
+# data$COMMENT <- gsub('[0-9]+', ' ', data$COMMENT) # delete angka
 data$COMMENT <- gsub('\t|\\s+', ' ', data$COMMENT) # merubah space yg tidak perlu
 # jadikan dalam korpus
 koleksi <- data.frame(doc_id=data$COMMENT_ID, text=data$COMMENT)
@@ -35,3 +35,8 @@ korpus <- tm_map(korpus, stemDocument)
 korpus <- tm_map(korpus, removeWords, stopwords("english"))
 # membuat tdm
 tdm <- TermDocumentMatrix(korpus)
+
+# menghitung idf
+df <- sort(rowSums(as.matrix(tdm)!=0), decreasing=TRUE)
+N <- length(colSums(as.matrix(tdm)))
+IDF_t <- log(N/df)
