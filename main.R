@@ -3,15 +3,6 @@
 ## 245 spam (1)
 ## 204 bukan spam (0)
 
-# include library
-library(tm)
-library(NLP)
-library(SnowballC)
-library(RColorBrewer)
-library(wordcloud)
-library(e1071)
-library(gmodels)
-
 ######################## 1. Prarposes
 # baca data
 file <- file.choose()
@@ -34,8 +25,7 @@ data$COMMENT <- removePunctuation(data$COMMENT)
 data$COMMENT <- gsub('\t|\\s+', ' ', data$COMMENT) # merubah space yg tidak perlu
 # jadikan dalam korpus
 koleksi <- data.frame(doc_id=data$COMMENT_ID, text=data$COMMENT)
-data$CLASS <- factor(data$CLASS)
-korpus <- VCorpus(VectorSource(koleksi))
+korpus <- Corpus(DataframeSource(koleksi))
 
 
 ######################## 2. Pengindeksan
