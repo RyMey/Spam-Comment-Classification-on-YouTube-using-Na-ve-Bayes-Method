@@ -1,24 +1,23 @@
 ### install required packages
 
 library(tm)
-library(NLP)
-library(SnowballC)
-library(RColorBrewer)
-library(wordcloud)
 library(e1071)
-library(gmodels)
+library(class)
 
 # Baca Data
-setwd("D:/DOCUMENT/MAIL/Kuliah/Temu Kembali Informasi/Project/Spam/")
-data <- read.csv("dataEminem.csv",header = TRUE, sep = ",", stringsAsFactors = FALSE)
+file <- file.choose()
+data <- read.csv(file,header = TRUE, sep = ",")
 data <- subset(data, select = -c(DATE))
 data <- subset(data, select = -c(COMMENT_ID))
-data <- subset(data, select = -c(AUTHOR))
-# Membuat korpus
+# lower case
+data$AUTHOR <- tolower(data$AUTHOR)
+data$CONTENT <- tolower(data$CONTENT)
+# paste ke 1 kolom (isi)
+data$COMMENT <- paste(data$AUTHOR,data$CONTENT) 
 
 data$CLASS <- factor(data$CLASS)
 table(data$CLASS)
-korpus <- VCorpus(VectorSource(data$CONTENT))
+korpus <- VCorpus(VectorSource(data$COMMENT))
 # Pra Proses
 korpus <- tm_map(korpus,content_transformer(tolower))
 # Menghapus Tanda Baca
@@ -44,10 +43,6 @@ dataUji <- tdm[337:448,]
 
 dataLatihLabel <- data[1:336,]$CLASS
 dataUjiLabel <- data[337:448,]$CLASS
-
-# Memisahkan data spam dan bukan spam
-spam <- subset(data, CLASS == "1")
-notSpam <- subset(data, CLASS == "0")
 
 # Memilih data yang sering muncul
 freqWord <- findFreqTerms(dataLatih,5)
@@ -77,5 +72,12 @@ dataClassifier2 <- naiveBayes(data_latih,dataLatihLabel,laplace = 1)
 dataTestPrediction2 <- predict(dataClassifier2,data_uji)
 
 CrossTable(dataTestPrediction2, dataUjiLabel,
+           prop.chisq = FALSE, prop.t = FALSE,
+           dnn = c('predicted', 'actual'))
+
+startK <- ceiling(sqrt(nrow(dataLatih)))-3
+predictionLabels <- knn(train = dataLatih, test = dataUji, cl = dataLatihLabel, k = startK)
+
+CrossTable(predictionLabels, dataUjiLabel,
            prop.chisq = FALSE, prop.t = FALSE,
            dnn = c('predicted', 'actual'))
