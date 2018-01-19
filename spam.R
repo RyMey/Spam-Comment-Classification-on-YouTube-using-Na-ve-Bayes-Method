@@ -26,6 +26,8 @@ korpus <- tm_map(korpus,removePunctuation)
 korpus <- tm_map(korpus,stripWhitespace)
 
 ######################## 2. Pengindeksan
+# stemming
+korpus <- tm_map(korpus, stemDocument)
 # Menghapus stopwords dalam bahasa inggris
 korpus <- tm_map(korpus,removeWords,stopwords("en"))
 

@@ -16,7 +16,6 @@ data$CONTENT <- tolower(data$CONTENT)
 # paste ke 1 kolom (isi)
 data$COMMENT <- paste(data$AUTHOR,data$CONTENT) 
 # remove punctuation
-require(tm)
 library(tm)
 data$COMMENT <- removePunctuation(data$COMMENT)
 # delete karakter yang tidak diperlukan
@@ -49,28 +48,9 @@ dataUji <- tdm[337:448,]
 dataLatihLabel <- data[1:336,]$CLASS
 dataUjiLabel <- data[337:448,]$CLASS
 
-# Memisahkan data spam dan bukan spam
-spam <- subset(data, CLASS == "1")
-notSpam <- subset(data, CLASS == "0")
+dataClassifier <- naiveBayes(dataLatih,dataLatihLabel)
 
-# Memilih data yang sering muncul
-freqWord <- findFreqTerms(dataLatih,5)
-
-# filter tdm dengan freqword
-tdm_freq_latih <- dataLatih[,freqWord]
-tdm_freq_uji <- dataUji[,freqWord]
-
-# Mengubah kelas menjadi factor
-convert_counts <- function(x) {
-  x <- ifelse(x > 0, "Yes", "No")
-}
-
-data_latih <- apply(tdm_freq_latih,MARGIN = 2,convert_counts)
-data_uji <- apply(tdm_freq_uji,MARGIN = 2, convert_counts)
-
-dataClassifier <- naiveBayes(data_latih,dataLatihLabel)
-
-dataTestPrediction <- predict(dataClassifier,data_uji)
+dataTestPrediction <- predict(dataClassifier,dataUji)
 
 CrossTable(dataTestPrediction, dataUjiLabel,
            prop.chisq = FALSE, prop.t = FALSE,
@@ -78,8 +58,17 @@ CrossTable(dataTestPrediction, dataUjiLabel,
 
 #Ubah nilai laplace menjadi 1
 dataClassifier2 <- naiveBayes(data_latih,dataLatihLabel,laplace = 1)
-dataTestPrediction2 <- predict(dataClassifier2,data_uji)
+dataTestPrediction2 <- predict(dataClassifier2,dataUji)
 
 CrossTable(dataTestPrediction2, dataUjiLabel,
            prop.chisq = FALSE, prop.t = FALSE,
            dnn = c('predicted', 'actual'))
+
+library(class)
+startK <- ceiling(sqrt(nrow(dataLatih)))-3
+predictionLabels <- knn(train = dataLatih, test = dataUji, cl = dataLatihLabel, k = startK)
+
+CrossTable(predictionLabels, dataUjiLabel,
+           prop.chisq = FALSE, prop.t = FALSE,
+           dnn = c('predicted', 'actual'))
+
