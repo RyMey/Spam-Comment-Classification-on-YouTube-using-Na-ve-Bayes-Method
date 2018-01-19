@@ -3,7 +3,7 @@
 library(tm)
 library(e1071)
 library(class)
-
+######################## 1. Praproses
 # Baca Data
 file <- file.choose()
 data <- read.csv(file,header = TRUE, sep = ",")
@@ -22,20 +22,22 @@ korpus <- VCorpus(VectorSource(data$COMMENT))
 korpus <- tm_map(korpus,content_transformer(tolower))
 # Menghapus Tanda Baca
 korpus <- tm_map(korpus,removePunctuation)
-# Menghapus stopwords dalam bahasa inggris
-korpus <- tm_map(korpus,removeWords,stopwords("en"))
 # Menghapus spasi tambahan
 korpus <- tm_map(korpus,stripWhitespace)
+
+######################## 2. Pengindeksan
+# Menghapus stopwords dalam bahasa inggris
+korpus <- tm_map(korpus,removeWords,stopwords("en"))
+
+######################## 3. Pemilihan Fitur
 # Membuat tdm
 tdm <- DocumentTermMatrix(korpus)
-# Pra Proses
-
 # Menghitung IDF
 df <- sort(rowSums(as.matrix(tdm)!=0), decreasing=TRUE)
 N <- length(colSums(as.matrix(tdm)))
 IDF_t <- log(N/df)
-# Menghitung IDF
 
+######################## 4,5. Klasifikasi & Evaluasi
 # Pembagian Data
 # 75% data latih 25% data uji
 dataLatih <- tdm[1:336,]
