@@ -1,9 +1,5 @@
-## Kelompok 1
-## KLASIFIKASI KOMENTAR SPAM PADA SITUS YOUTUBE DENGAN METODE NAÏVE BAYES
-## 245 spam (1)
-## 204 bukan spam (0)
+### install required packages
 
-# include library
 library(tm)
 library(NLP)
 library(SnowballC)
@@ -12,44 +8,34 @@ library(wordcloud)
 library(e1071)
 library(gmodels)
 
-######################## 1. Prarposes
-# baca data
-file <- file.choose()
-data <- read.csv(file,header = TRUE, sep = ",")
-# delete date
+# Baca Data
+setwd("D:/DOCUMENT/MAIL/Kuliah/Temu Kembali Informasi/Project/Spam/")
+data <- read.csv("dataEminem.csv",header = TRUE, sep = ",", stringsAsFactors = FALSE)
 data <- subset(data, select = -c(DATE))
+data <- subset(data, select = -c(COMMENT_ID))
+data <- subset(data, select = -c(AUTHOR))
+# Membuat korpus
 
-# lower case
-data$AUTHOR <- tolower(data$AUTHOR)
-data$CONTENT <- tolower(data$CONTENT)
-# paste ke 1 kolom (isi)
-data$COMMENT <- paste(data$AUTHOR,data$CONTENT) 
-# remove punctuation
-require(tm)
-library(tm)
-data$COMMENT <- removePunctuation(data$COMMENT)
-# delete karakter yang tidak diperlukan
-# data$COMMENT <- gsub('[^a-zA-Z]', ' ', data$COMMENT) # delete selain alfabet
-# data$COMMENT <- gsub('[0-9]+', ' ', data$COMMENT) # delete angka
-data$COMMENT <- gsub('\t|\\s+', ' ', data$COMMENT) # merubah space yg tidak perlu
-# jadikan dalam korpus
-koleksi <- data.frame(doc_id=data$COMMENT_ID, text=data$COMMENT)
 data$CLASS <- factor(data$CLASS)
-korpus <- VCorpus(VectorSource(koleksi))
-
-
-######################## 2. Pengindeksan
-# stemming
-korpus <- tm_map(korpus, stemDocument)
-# remove stopword
-korpus <- tm_map(korpus, removeWords, stopwords("english"))
-# membuat tdm
+table(data$CLASS)
+korpus <- VCorpus(VectorSource(data$CONTENT))
+# Pra Proses
+korpus <- tm_map(korpus,content_transformer(tolower))
+# Menghapus Tanda Baca
+korpus <- tm_map(korpus,removePunctuation)
+# Menghapus stopwords dalam bahasa inggris
+korpus <- tm_map(korpus,removeWords,stopwords("en"))
+# Menghapus spasi tambahan
+korpus <- tm_map(korpus,stripWhitespace)
+# Membuat tdm
 tdm <- DocumentTermMatrix(korpus)
+# Pra Proses
 
-# menghitung idf
+# Menghitung IDF
 df <- sort(rowSums(as.matrix(tdm)!=0), decreasing=TRUE)
 N <- length(colSums(as.matrix(tdm)))
 IDF_t <- log(N/df)
+# Menghitung IDF
 
 # Pembagian Data
 # 75% data latih 25% data uji
